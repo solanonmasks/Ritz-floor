@@ -1,0 +1,328 @@
+---
+// Page markup. Content comes from src/data/site.js.
+import '../styles/global.css';
+import { site } from '../data/site.js';
+
+const canonical = new URL('/', Astro.site).href;
+
+// Search-engine info: one business with two showroom locations.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'HomeGoodsStore',
+  name: site.name,
+  legalName: site.legalName,
+  url: canonical,
+  email: site.email,
+  telephone: '+1-' + site.phone,
+  image: site.hero.img,
+  description: site.description,
+  sameAs: [site.facebook],
+  department: site.stores.map((s) => ({
+    '@type': 'HomeGoodsStore',
+    name: `${site.name} ${s.c}`,
+    telephone: '+1-' + s.p,
+    email: site.email,
+    hasMap: s.map,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: s.street,
+      addressLocality: s.city,
+      addressRegion: 'BC',
+      addressCountry: 'CA',
+    },
+  })),
+};
+---
+<!doctype html>
+<html lang="en-CA">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{site.title}</title>
+  <meta name="description" content={site.description} />
+  <link rel="canonical" href={canonical} />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="theme-color" content="#D9561A" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content={site.name} />
+  <meta property="og:title" content={site.title} />
+  <meta property="og:description" content={site.description} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:image" content={site.hero.img} />
+  <meta property="og:locale" content="en_CA" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={site.title} />
+  <meta name="twitter:description" content={site.description} />
+  <meta name="twitter:image" content={site.hero.img} />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+  <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@600;700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <script is:inline>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+  <!-- Header -->
+  <header id="top" class="site-header">
+    <div class="wrap bar">
+      <a href="#top" class="logo" aria-label={site.name}>
+        <span class="logo-main">Ritz Floor</span>
+        <span class="logo-sub">&amp; Decor</span>
+      </a>
+      <nav class="main-nav" aria-label="Main">
+        {site.nav.map((n) => <a href={n.href}>{n.label}</a>)}
+      </nav>
+      <div class="header-actions">
+        <a href={site.phoneHref} class="btn btn-dark header-call">{site.phone}</a>
+        <button type="button" class="menu-btn" aria-expanded="false" aria-controls="mobile-nav">
+          <span class="bars" aria-hidden="true"></span> Menu
+        </button>
+      </div>
+    </div>
+    <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile">
+      {site.nav.map((n) => <a href={n.href}>{n.label}</a>)}
+      <a href="#quote">Get a quote</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="wrap hero">
+      <div class="hero-copy">
+        <p class="eyebrow" data-hero style="animation-delay:.1s">{site.hero.eyebrow}</p>
+        <h1 data-hero style="animation-delay:.24s">{site.hero.title} <span class="accent">{site.hero.titleAccent}</span></h1>
+        <p class="hero-text" data-hero style="animation-delay:.38s">{site.hero.text}</p>
+        <div class="btn-row" data-hero style="animation-delay:.52s">
+          <a href="#visit" class="btn btn-orange">Visit the showroom</a>
+          <a href="#quote" class="btn btn-outline">Get an install quote</a>
+        </div>
+      </div>
+      <div class="hero-media">
+        <img src={site.hero.img} alt={site.hero.imgAlt} fetchpriority="high" />
+        <div class="planks" aria-hidden="true">
+          {site.hero.planks.map((c, i) => (
+            <span class={i % 2 ? 'plank odd' : 'plank'} style={`background:${c};animation-delay:${(0.5 + i * 0.1).toFixed(1)}s`}></span>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Proof strip -->
+    <section class="proof" aria-label="Why Ritz">
+      <div class="wrap proof-grid">
+        {site.proof.map((p) => (
+          <div class="proof-item" data-reveal>
+            <strong>{p.t}</strong>
+            <span>{p.d}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Walk the showroom -->
+    <section id="floors" class="wrap section">
+      <div class="two-col section-head">
+        <h2 class="h2" data-reveal>{site.floorsIntro.title}</h2>
+        <p data-reveal>{site.floorsIntro.text}</p>
+      </div>
+      <div class="floors">
+        {site.floors.map((f) => (
+          <article class="floor" data-reveal>
+            <div class="media"><img src={f.img} alt={`${f.t} flooring`} loading="lazy" /></div>
+            <h3>{f.t}</h3>
+            <p>{f.d}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <!-- Installation -->
+    <section id="install" class="install">
+      <div class="wrap section two-col install-grid">
+        <div class="install-left">
+          <h2 class="h2" data-reveal>{site.installIntro.title} <span class="accent">{site.installIntro.titleAccent}</span></h2>
+          <p data-reveal>{site.installIntro.text}</p>
+        </div>
+        <div class="steps">
+          {site.install.map((s) => (
+            <div class="step" data-reveal>
+              <span class="step-n">{s.n}</span>
+              <div>
+                <h3>{s.t}</h3>
+                <p>{s.d}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Reviews -->
+    <section id="reviews" class="wrap section">
+      <div class="reviews-head">
+        <h2 class="h2" data-reveal>{site.reviewsIntro.title}</h2>
+        <p data-reveal>{site.reviewsIntro.note}</p>
+      </div>
+      <div class="two-col reviews">
+        {site.reviews.map((r) => (
+          <figure class="review" data-reveal>
+            <blockquote>“{r.q}”</blockquote>
+            <figcaption>{r.n}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+
+    <!-- Two showrooms -->
+    <section id="visit" class="visit">
+      <div class="wrap section">
+        <h2 class="h2 visit-title" data-reveal>{site.storesIntro.title} <span class="accent-light">{site.storesIntro.titleAccent}</span></h2>
+        <div class="two-col stores">
+          {site.stores.map((s) => (
+            <div class="store" data-reveal>
+              <h3>{s.c}</h3>
+              <p>{s.a}</p>
+              <a href={s.tel} class="store-phone">{s.p}</a>
+              <a href={s.map} target="_blank" rel="noopener" class="store-map">Get directions</a>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Quote form -->
+    <section id="quote" class="wrap section two-col quote">
+      <div class="quote-left">
+        <h2 class="h2-xl" data-reveal>{site.quote.title}</h2>
+        <p data-reveal>{site.quote.text}</p>
+        <a data-reveal href={`mailto:${site.email}`} class="quote-email">{site.email}</a>
+      </div>
+      <div>
+        <form class="form" id="quote-form" data-reveal data-endpoint={site.formEndpoint}>
+          <div class="form-row">
+            <label class="field">Name<input name="name" autocomplete="name" required /></label>
+            <label class="field">Phone<input name="phone" type="tel" autocomplete="tel" required /></label>
+          </div>
+          <fieldset class="chips-group">
+            <legend>{site.quote.chipsLabel}</legend>
+            <div class="chips">
+              {site.quote.chips.map((c) => (
+                <button type="button" class="chip" aria-pressed="false" data-value={c}>{c}</button>
+              ))}
+            </div>
+            <input type="hidden" name="flooring_type" value="" />
+          </fieldset>
+          <label class="field">{site.quote.detailsLabel}<textarea name="rooms" rows="4"></textarea></label>
+          <p class="form-error" role="alert" hidden>{site.quote.error}</p>
+          <button type="submit" class="btn btn-orange form-submit">{site.quote.submitLabel}</button>
+        </form>
+        <div class="thanks" id="form-thanks" role="status" hidden>{site.quote.thanks}</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="wrap">
+      <span class="foot-logo">{site.name}</span>
+      <a href={site.facebook} target="_blank" rel="noopener" class="foot-social">Facebook</a>
+      <div class="foot-meta">
+        <span>© {new Date().getFullYear()} {site.legalName}</span>
+        <a href={site.credit.href} target="_blank" rel="noopener">{site.credit.label}</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Sticky bottom bar (phones and tablets) -->
+  <div class="bottom-bar">
+    <a href={site.phoneHref} class="call">Call</a>
+    <a href="#quote" class="go">Quote</a>
+  </div>
+
+  <script>
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Scroll reveal
+    const revealEls = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+    const showAll = () => revealEls.forEach((el) => { el.classList.remove('pre-reveal'); el.classList.add('revealed'); });
+    if (!reduce && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        let i = 0;
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          const el = e.target as HTMLElement;
+          const d = Math.min(i++, 5) * 0.08;
+          el.style.transitionDelay = `${d}s`;
+          el.classList.remove('pre-reveal');
+          el.classList.add('revealed');
+          io.unobserve(el);
+        });
+      }, { rootMargin: '0px 0px -8% 0px' });
+      revealEls.forEach((el) => {
+        if (el.getBoundingClientRect().top < window.innerHeight) return;
+        el.classList.add('pre-reveal');
+        io.observe(el);
+      });
+      setTimeout(showAll, 4000); // safety net
+    }
+
+    // Mobile menu
+    const menuBtn = document.querySelector<HTMLButtonElement>('.menu-btn');
+    const mobileNav = document.getElementById('mobile-nav');
+    if (menuBtn && mobileNav) {
+      const setOpen = (open: boolean) => {
+        menuBtn.setAttribute('aria-expanded', String(open));
+        mobileNav.classList.toggle('open', open);
+      };
+      menuBtn.addEventListener('click', () => setOpen(menuBtn.getAttribute('aria-expanded') !== 'true'));
+      mobileNav.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+    }
+
+    // Quote form
+    const form = document.getElementById('quote-form') as HTMLFormElement | null;
+    const thanks = document.getElementById('form-thanks');
+    if (form && thanks) {
+      const hidden = form.querySelector<HTMLInputElement>('input[name="flooring_type"]')!;
+      const chips = form.querySelectorAll<HTMLButtonElement>('.chip');
+      chips.forEach((chip) => {
+        chip.addEventListener('click', () => {
+          chip.setAttribute('aria-pressed', String(chip.getAttribute('aria-pressed') !== 'true'));
+          hidden.value = Array.from(chips)
+            .filter((c) => c.getAttribute('aria-pressed') === 'true')
+            .map((c) => c.dataset.value)
+            .join(', ');
+        });
+      });
+
+      const errorEl = form.querySelector<HTMLElement>('.form-error')!;
+      const submitBtn = form.querySelector<HTMLButtonElement>('.form-submit')!;
+      const showThanks = () => { form.hidden = true; thanks.hidden = false; };
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!form.reportValidity()) return;
+        errorEl.hidden = true;
+        const endpoint = form.dataset.endpoint;
+        if (!endpoint) { showThanks(); return; }
+        submitBtn.disabled = true;
+        try {
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { Accept: 'application/json' },
+          });
+          if (!res.ok) throw new Error(String(res.status));
+          showThanks();
+        } catch {
+          errorEl.hidden = false;
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+    }
+  </script>
+</body>
+</html>
