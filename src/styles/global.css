@@ -216,3 +216,6 @@ p { margin: 0; }
   .js [data-reveal].pre-reveal { opacity: 1; transform: none; }
   .floor:hover .media img { transform: none; }
 }
+
+/* Make sure anything with the "hidden" attribute stays hidden (e.g. the form after it is sent). */
+[hidden] { display: none !important; }
